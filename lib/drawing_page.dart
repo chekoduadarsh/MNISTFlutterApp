@@ -212,49 +212,6 @@ class _DrawingPageState extends State<DrawingPage> {
       ),
     );
   }
-
-  final List<PredictionData> data = [
-    PredictionData(
-      digit: "0",
-      accuracy: 10.0,
-    ),
-    PredictionData(
-      digit: "1",
-      accuracy: 20.0,
-    ),
-    PredictionData(
-      digit: "2",
-      accuracy: 10.0,
-    ),
-    PredictionData(
-      digit: "3",
-      accuracy: 0.0,
-    ),
-    PredictionData(
-      digit: "4",
-      accuracy: 0.0,
-    ),
-    PredictionData(
-      digit: "5",
-      accuracy: 0.0,
-    ),
-    PredictionData(
-      digit: "6",
-      accuracy: 0.0,
-    ),
-    PredictionData(
-      digit: "7",
-      accuracy: 0.0,
-    ),
-    PredictionData(
-      digit: "8",
-      accuracy: 0.0,
-    ),
-    PredictionData(
-      digit: "9",
-      accuracy: 0.0,
-    ),
-  ];
 }
 
 class predictionChart extends StatefulWidget {
