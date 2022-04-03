@@ -35,8 +35,39 @@ class _DrawingPageState extends State<DrawingPage> {
     });
   }
 
+  late int showingTooltip;
+
+  @override
+  void initState() {
+    showingTooltip = -1;
+    super.initState();
+  }
+
+  BarChartGroupData generateGroupData(int x, int y) {
+    return BarChartGroupData(
+      x: x,
+      showingTooltipIndicators: showingTooltip == x ? [0] : [],
+      barRods: [
+        BarChartRodData(toY: y.toDouble()),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final List<BarChartGroupData> pred_data = [
+      generateGroupData(0, 10),
+      generateGroupData(1, 20),
+      generateGroupData(2, 30),
+      generateGroupData(3, 0),
+      generateGroupData(4, 0),
+      generateGroupData(5, 0),
+      generateGroupData(6, 0),
+      generateGroupData(7, 0),
+      generateGroupData(8, 0),
+      generateGroupData(9, 0),
+    ];
+    print(pred_data);
     return Scaffold(
       backgroundColor: Colors.yellow[50],
       body: Stack(
@@ -45,7 +76,7 @@ class _DrawingPageState extends State<DrawingPage> {
           buildCurrentPath(context),
           buildStrokeToolbar(),
           buildColorToolbar(),
-          predictionChart()
+          predictionChart(pred_data: pred_data)
         ],
       ),
     );
@@ -215,7 +246,9 @@ class _DrawingPageState extends State<DrawingPage> {
 }
 
 class predictionChart extends StatefulWidget {
-  predictionChart({Key? key}) : super(key: key);
+  final List<BarChartGroupData> pred_data = [];
+
+  predictionChart({Key? key, required pred_data}) : super(key: key);
 
   @override
   State<predictionChart> createState() => _predictionChartState();
@@ -242,18 +275,11 @@ class _predictionChartState extends State<predictionChart> {
 
   @override
   Widget build(BuildContext context) {
-    final List<BarChartGroupData> pred_data = [
-      generateGroupData(0, 0),
-      generateGroupData(1, 0),
-      generateGroupData(2, 0),
-      generateGroupData(3, 0),
-      generateGroupData(4, 0),
-      generateGroupData(5, 0),
-      generateGroupData(6, 0),
-      generateGroupData(7, 0),
-      generateGroupData(8, 0),
-      generateGroupData(9, 0),
-    ];
+    print("##### On Bar Graph Widget ######");
+    print(widget.pred_data);
+    if (widget.pred_data.length == 0) {
+      return SizedBox(height: 10);
+    }
     return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
@@ -265,7 +291,7 @@ class _predictionChartState extends State<predictionChart> {
               aspectRatio: 2,
               child: BarChart(
                 BarChartData(
-                  barGroups: pred_data,
+                  barGroups: widget.pred_data,
                   barTouchData: BarTouchData(
                       enabled: true,
                       handleBuiltInTouches: false,

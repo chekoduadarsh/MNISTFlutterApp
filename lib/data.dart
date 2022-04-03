@@ -8,4 +8,5 @@ class PredictionData {
   final double accuracy;
 
   PredictionData({required this.digit, required this.accuracy});
+  int showingTooltip = -1;
 }
