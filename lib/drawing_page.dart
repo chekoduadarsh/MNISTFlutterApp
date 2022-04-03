@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter_live_digit_recognition/data.dart';
 import 'package:flutter_live_digit_recognition/drawn_line.dart';
 import 'package:flutter_live_digit_recognition/sketcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+
+import 'package:fl_chart/fl_chart.dart';
 
 class DrawingPage extends StatefulWidget {
   @override
@@ -42,6 +45,7 @@ class _DrawingPageState extends State<DrawingPage> {
           buildCurrentPath(context),
           buildStrokeToolbar(),
           buildColorToolbar(),
+          predictionChart()
         ],
       ),
     );
@@ -207,5 +211,132 @@ class _DrawingPageState extends State<DrawingPage> {
         ),
       ),
     );
+  }
+
+  final List<PredictionData> data = [
+    PredictionData(
+      digit: "0",
+      accuracy: 10.0,
+    ),
+    PredictionData(
+      digit: "1",
+      accuracy: 20.0,
+    ),
+    PredictionData(
+      digit: "2",
+      accuracy: 10.0,
+    ),
+    PredictionData(
+      digit: "3",
+      accuracy: 0.0,
+    ),
+    PredictionData(
+      digit: "4",
+      accuracy: 0.0,
+    ),
+    PredictionData(
+      digit: "5",
+      accuracy: 0.0,
+    ),
+    PredictionData(
+      digit: "6",
+      accuracy: 0.0,
+    ),
+    PredictionData(
+      digit: "7",
+      accuracy: 0.0,
+    ),
+    PredictionData(
+      digit: "8",
+      accuracy: 0.0,
+    ),
+    PredictionData(
+      digit: "9",
+      accuracy: 0.0,
+    ),
+  ];
+}
+
+class predictionChart extends StatefulWidget {
+  predictionChart({Key? key}) : super(key: key);
+
+  @override
+  State<predictionChart> createState() => _predictionChartState();
+}
+
+class _predictionChartState extends State<predictionChart> {
+  late int showingTooltip;
+
+  @override
+  void initState() {
+    showingTooltip = -1;
+    super.initState();
+  }
+
+  BarChartGroupData generateGroupData(int x, int y) {
+    return BarChartGroupData(
+      x: x,
+      showingTooltipIndicators: showingTooltip == x ? [0] : [],
+      barRods: [
+        BarChartRodData(toY: y.toDouble()),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<BarChartGroupData> pred_data = [
+      generateGroupData(0, 0),
+      generateGroupData(1, 0),
+      generateGroupData(2, 0),
+      generateGroupData(3, 0),
+      generateGroupData(4, 0),
+      generateGroupData(5, 0),
+      generateGroupData(6, 0),
+      generateGroupData(7, 0),
+      generateGroupData(8, 0),
+      generateGroupData(9, 0),
+    ];
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: AspectRatio(
+              aspectRatio: 2,
+              child: BarChart(
+                BarChartData(
+                  barGroups: pred_data,
+                  barTouchData: BarTouchData(
+                      enabled: true,
+                      handleBuiltInTouches: false,
+                      touchCallback: (event, response) {
+                        if (response != null &&
+                            response.spot != null &&
+                            event is FlTapUpEvent) {
+                          setState(() {
+                            final x = response.spot!.touchedBarGroup.x;
+                            final isShowing = showingTooltip == x;
+                            if (isShowing) {
+                              showingTooltip = -1;
+                            } else {
+                              showingTooltip = x;
+                            }
+                          });
+                        }
+                      },
+                      mouseCursorResolver: (event, response) {
+                        return response == null || response.spot == null
+                            ? MouseCursor.defer
+                            : SystemMouseCursors.click;
+                      }),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+        ]);
   }
 }
