@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter_live_digit_recognition/data.dart';
+import 'package:flutter_live_digit_recognition/mnist.dart';
 import 'package:flutter_live_digit_recognition/drawn_line.dart';
 import 'package:flutter_live_digit_recognition/sketcher.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +21,7 @@ class _DrawingPageState extends State<DrawingPage> {
   List<DrawnLine> lines = <DrawnLine>[];
   Color selectedColor = Colors.black;
   double selectedWidth = 5.0;
-
+  AppBrain mnist = AppBrain();
   DrawnLine line = DrawnLine([], Colors.black, 1.0);
 
   StreamController<List<DrawnLine>> linesStreamController =
@@ -138,13 +138,15 @@ class _DrawingPageState extends State<DrawingPage> {
     line = DrawnLine([point], selectedColor, selectedWidth);
   }
 
-  void onPanUpdate(DragUpdateDetails details) {
+  void onPanUpdate(DragUpdateDetails details) async {
     RenderBox box = context.findRenderObject() as RenderBox;
     Offset point = box.globalToLocal(details.globalPosition);
 
     List<Offset> path = List.from(line.path)..add(point);
     line = DrawnLine(path, selectedColor, selectedWidth);
     currentLineStreamController.add(line);
+    List? predictions = await mnist.processCanvasPoints(path);
+    print(predictions);
   }
 
   void onPanEnd(DragEndDetails details) {

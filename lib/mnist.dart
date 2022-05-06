@@ -8,19 +8,7 @@ import 'package:tflite/tflite.dart';
 import 'package:flutter_live_digit_recognition/constants.dart';
 
 class AppBrain {
-  Future loadModel() async {
-    Tflite.close();
-    try {
-      await Tflite.loadModel(
-        model: "assets/flutter_mnist_model.tflite",
-        labels: "assets/labels.txt",
-      );
-    } on PlatformException {
-      print('Failed to load model.');
-    }
-  }
-
-  Future<List<dynamic>?> processCanvasPoints(List<Offset> points) async {
+  processCanvasPoints(List<Offset> points) async {
     // We create an empty canvas 280x280 pixels
     final canvasSizeWithPadding = kCanvasSize + (2 * kCanvasInnerOffset);
     final canvasOffset = Offset(kCanvasInnerOffset, kCanvasInnerOffset);
@@ -71,10 +59,32 @@ class AppBrain {
     return predictImage(resizedImage);
   }
 
-  Future<List<dynamic>?> predictImage(im.Image image) async {
-    return await Tflite.runModelOnBinary(
-      binary: imageToByteListFloat32(image, kModelInputSize),
-    );
+  predictImage(im.Image image) async {
+    Tflite.close();
+    try {
+      String? res = await Tflite.loadModel(
+          model: "assets/flutter_mnist_model.tflite",
+          labels: "assets/labels.txt",
+          numThreads: 1, // defaults to 1
+          isAsset:
+              true, // defaults to true, set to false to load resources outside assets
+          useGpuDelegate:
+              false // defaults to false, set to true to use GPU delegate
+          );
+      print('Model loaded successfully.');
+    } on PlatformException {
+      print('Failed to load model.');
+    }
+
+    Uint8List float32_image = imageToByteListFloat32(image, kModelInputSize);
+
+    var recognitions = await Tflite.runModelOnBinary(
+        binary: float32_image, // required
+        numResults: 10, // defaults to 5
+        threshold: 0.05, // defaults to 0.1
+        asynch: true // defaults to true
+        );
+    return recognitions;
   }
 
   Uint8List imageToByteListFloat32(im.Image image, int inputSize) {
