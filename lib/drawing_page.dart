@@ -53,12 +53,13 @@ class _DrawingPageState extends State<DrawingPage> {
     );
   }
 
+  List? predictions;
   @override
   Widget build(BuildContext context) {
     final List<BarChartGroupData> pred_data = [
       generateGroupData(0, 10),
       generateGroupData(1, 20),
-      generateGroupData(2, 30),
+      generateGroupData(2, 0),
       generateGroupData(3, 0),
       generateGroupData(4, 0),
       generateGroupData(5, 0),
@@ -145,12 +146,14 @@ class _DrawingPageState extends State<DrawingPage> {
     List<Offset> path = List.from(line.path)..add(point);
     line = DrawnLine(path, selectedColor, selectedWidth);
     currentLineStreamController.add(line);
-    List? predictions = await mnist.processCanvasPoints(path);
-    print(predictions);
   }
 
-  void onPanEnd(DragEndDetails details) {
+  void onPanEnd(DragEndDetails details) async {
     lines = List.from(lines)..add(line);
+
+    List<Offset> path = List.from(line.path);
+    predictions = await mnist.processCanvasPoints(path);
+    print(predictions);
 
     linesStreamController.add(lines);
   }
@@ -248,9 +251,9 @@ class _DrawingPageState extends State<DrawingPage> {
 }
 
 class predictionChart extends StatefulWidget {
-  final List<BarChartGroupData> pred_data = [];
+  final List<BarChartGroupData> pred_data;
 
-  predictionChart({Key? key, required pred_data}) : super(key: key);
+  predictionChart({Key? key, required this.pred_data}) : super(key: key);
 
   @override
   State<predictionChart> createState() => _predictionChartState();
