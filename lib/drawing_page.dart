@@ -53,18 +53,7 @@ class _DrawingPageState extends State<DrawingPage> {
     super.initState();
   }
 
-  List<BarChartGroupData> pred_data = [
-    generateGroupData(0, 0.1),
-    generateGroupData(1, 0),
-    generateGroupData(2, 0),
-    generateGroupData(3, 0),
-    generateGroupData(4, 0),
-    generateGroupData(5, 0),
-    generateGroupData(6, 0),
-    generateGroupData(7, 0),
-    generateGroupData(8, 0),
-    generateGroupData(9, 0),
-  ];
+  List<BarChartGroupData> pred_data = [];
 
   List? predictions;
   @override
@@ -153,8 +142,8 @@ class _DrawingPageState extends State<DrawingPage> {
 
     List<Offset> path = List.from(line.path);
     predictions = await mnist.processCanvasPoints(path);
-    pred_data = [];
     if (predictions != null) {
+      pred_data = [];
       for (var i = 0; i < 10; i++) {
         for (var j = 0; j < predictions!.length; j++) {
           var prediction = predictions?[j];
@@ -168,7 +157,10 @@ class _DrawingPageState extends State<DrawingPage> {
       }
     }
     print(predictions);
-
+    setState(() {
+      lines = [];
+      line = DrawnLine([], Colors.black, 1.0);
+    });
     linesStreamController.add(lines);
   }
 
@@ -294,8 +286,6 @@ class _predictionChartState extends State<predictionChart> {
 
   @override
   Widget build(BuildContext context) {
-    print("##### On Bar Graph Widget ######");
-    print(widget.pred_data);
     if (widget.pred_data.length == 0) {
       return SizedBox(height: 10);
     }
@@ -311,29 +301,25 @@ class _predictionChartState extends State<predictionChart> {
               child: BarChart(
                 BarChartData(
                   barGroups: widget.pred_data,
-                  barTouchData: BarTouchData(
-                      enabled: true,
-                      handleBuiltInTouches: false,
-                      touchCallback: (event, response) {
-                        if (response != null &&
-                            response.spot != null &&
-                            event is FlTapUpEvent) {
-                          setState(() {
-                            final x = response.spot!.touchedBarGroup.x;
-                            final isShowing = showingTooltip == x;
-                            if (isShowing) {
-                              showingTooltip = -1;
-                            } else {
-                              showingTooltip = x;
-                            }
-                          });
-                        }
-                      },
-                      mouseCursorResolver: (event, response) {
-                        return response == null || response.spot == null
-                            ? MouseCursor.defer
-                            : SystemMouseCursors.click;
-                      }),
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false, // this one
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 28,
+                      ),
+                    ),
+                    topTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
                 ),
               ),
             ),
