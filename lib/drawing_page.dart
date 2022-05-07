@@ -16,6 +16,16 @@ class DrawingPage extends StatefulWidget {
   _DrawingPageState createState() => _DrawingPageState();
 }
 
+BarChartGroupData generateGroupData(int x, double y) {
+  return BarChartGroupData(
+    x: x,
+    showingTooltipIndicators: -1 == x ? [0] : [],
+    barRods: [
+      BarChartRodData(toY: y.toDouble()),
+    ],
+  );
+}
+
 class _DrawingPageState extends State<DrawingPage> {
   GlobalKey _globalKey = new GlobalKey();
   List<DrawnLine> lines = <DrawnLine>[];
@@ -43,32 +53,22 @@ class _DrawingPageState extends State<DrawingPage> {
     super.initState();
   }
 
-  BarChartGroupData generateGroupData(int x, int y) {
-    return BarChartGroupData(
-      x: x,
-      showingTooltipIndicators: showingTooltip == x ? [0] : [],
-      barRods: [
-        BarChartRodData(toY: y.toDouble()),
-      ],
-    );
-  }
+  List<BarChartGroupData> pred_data = [
+    generateGroupData(0, 0.1),
+    generateGroupData(1, 0),
+    generateGroupData(2, 0),
+    generateGroupData(3, 0),
+    generateGroupData(4, 0),
+    generateGroupData(5, 0),
+    generateGroupData(6, 0),
+    generateGroupData(7, 0),
+    generateGroupData(8, 0),
+    generateGroupData(9, 0),
+  ];
 
   List? predictions;
   @override
   Widget build(BuildContext context) {
-    final List<BarChartGroupData> pred_data = [
-      generateGroupData(0, 10),
-      generateGroupData(1, 20),
-      generateGroupData(2, 0),
-      generateGroupData(3, 0),
-      generateGroupData(4, 0),
-      generateGroupData(5, 0),
-      generateGroupData(6, 0),
-      generateGroupData(7, 0),
-      generateGroupData(8, 0),
-      generateGroupData(9, 0),
-    ];
-    print(pred_data);
     return Scaffold(
       backgroundColor: Colors.yellow[50],
       body: Stack(
@@ -153,6 +153,20 @@ class _DrawingPageState extends State<DrawingPage> {
 
     List<Offset> path = List.from(line.path);
     predictions = await mnist.processCanvasPoints(path);
+    pred_data = [];
+    if (predictions != null) {
+      for (var i = 0; i < 10; i++) {
+        for (var j = 0; j < predictions!.length; j++) {
+          var prediction = predictions?[j];
+          if (int.parse(prediction?["label"]) == i) {
+            pred_data.add(generateGroupData(
+                int.parse(prediction?["label"]), prediction?["confidence"]));
+          }
+        }
+
+        pred_data.add(generateGroupData(i, 0));
+      }
+    }
     print(predictions);
 
     linesStreamController.add(lines);
