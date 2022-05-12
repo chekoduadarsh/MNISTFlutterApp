@@ -156,10 +156,8 @@ class _DrawingPageState extends State<DrawingPage> {
         pred_data.add(generateGroupData(i, 0));
       }
     }
-    print(predictions);
     setState(() {
       lines = [];
-      line = DrawnLine([], Colors.black, 1.0);
     });
     linesStreamController.add(lines);
   }
